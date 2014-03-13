@@ -6,7 +6,8 @@ import whisperer
 import sys
 
 if __name__ == '__main__':
-	if len(sys.argv) != 2:
-		print >> sys.stderr, "Usage: %s <hostname>" % sys.argv[0]
-		sys.exit(1)
+    if len(sys.argv) != 2:
+        print >> sys.stderr, "Usage: %s <hostname>" % sys.argv[0]
+        sys.exit(1)
     whisperer.whisperer("%s.sandai.net" % sys.argv[1], "/usr/local/whisper/conf/whisperer.conf")
+    
