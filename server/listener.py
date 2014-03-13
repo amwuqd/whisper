@@ -31,7 +31,7 @@ class listener(object):
         self.LOG_LEVEL          = conf_parse.get("listener", "LOG_LEVEL")
         self.encode             = encoder.encoder(self.PRIVATE_KEY_FILE, self.REMOTE_KEY_FILE)
     def init_log(self):
-        self.logger = logging.getLogger("auth-ctrl")
+        self.logger = logging.getLogger("whisper")
         self.logger.setLevel(logging.DEBUG)
         fh = logging.FileHandler("access.log")
         fh.setLevel(logging.DEBUG)
@@ -84,4 +84,4 @@ class listener(object):
         if res is None:
             raise PermissionDeny
         else:
-            return "0..%s" % res
+            return res
