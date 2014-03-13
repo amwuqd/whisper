@@ -4,24 +4,34 @@
 
 import redis
 import sys
+import encoder
+import config
 
-REDIS_HOST = "localhost"
-REDIS_PORT = 6379
-REDIS_DB   = 0
-REDIS_AUTH = "foobared"
-
-
-def get_redis():
-    return redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, password=REDIS_AUTH)
-
-def main(filename):
-    r = get_redis()
-    for line in open(filename, 'r'):
-        try:
-            key, value = line.split()
-        except:
-            pass
-        r.setex(key, value, 3600)
+class uploader(object):
+	def __init__(self, password_file, conf_file):
+		self.get_conf(conf_file)
+		self.run()
+    def get_conf(self, conf_file):
+        conf_parse = ConfigParser.ConfigParser()
+        conf_parse.read(conf_file)
+        self.REDIS_PORT         = conf_parse.getint("listener", "REDIS_PORT")
+        self.REDIS_DB           = conf_parse.getint("listener", "REDIS_DB")
+        self.REDIS_AUTH         = conf_parse.get("listener", "REDIS_AUTH")
+        self.PRIVATE_KEY_FILE   = conf_parse.get("listener", "PRIVATE_KEY_FILE")
+        self.REMOTE_KEY_FILE    = conf_parse.get("listener", "REMOTE_KEY_FILE")
+        self.encode             = encoder.encoder(self.PRIVATE_KEY_FILE, self.REMOTE_KEY_FILE)
+    def run(self):
+    	r = self.get_redis()
+    	for line in open(self.password_file, 'r'):
+    	   	try:
+    	   		key, value = line.split()
+    	   		r.setex(key, self.encode.encode(value))
+    	   	except:
+    	   		print >> sys.stderr, key, value, "upload fail."
+    def get_redis(self):
+    	return redis.Redis(host=self.REDIS_HOST, port=self.REDIS_PORT, db=self.REDIS_DB, password=self.REDIS_AUTH)
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+	if len(sys.argv) != 2:
+		print >> sys.stderr, "Usage: %s <file_path>" % sys.argv[0]
+    uploader(sys.argv[1], CONF_FILE)

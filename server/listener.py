@@ -65,7 +65,8 @@ class listener(object):
                 conn.settimeout(5)
                 buf = self.encode.decode(conn.recv(1024))
                 res = self.handler(buf, r)
-                conn.send(self.encode.encode(res))
+                #conn.send(self.encode.encode(res))
+                conn.send(res)
                 self.logger.info("%s %s" % (addr, buf))
                 self.logger.debug("%s %s %s" % (addr, buf, res))
             except socket.error, msg:
