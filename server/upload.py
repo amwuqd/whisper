@@ -9,7 +9,8 @@ import ConfigParser
 import config
 
 class uploader(object):
-    def __init__(self, password_file, conf_file):
+    def __init__(self, password_file, conf_file, expire=3600):
+        self.expire = expire
         self.password_file = password_file
         self.get_conf(conf_file)
         self.run()
@@ -29,7 +30,7 @@ class uploader(object):
             try:
                 key, value = line.split()
                 value = self.encode.encode("0..%s" % value)
-                r.setex(key, value, 3600)
+                r.setex(key, value, self.expire)
             except:
                 print >> sys.stderr, key, value, "upload fail."
     def get_redis(self):
