@@ -33,12 +33,14 @@ class encoder(object):
     def decode(self, MESSAGE):
         return rsa.decrypt(MESSAGE, self.PRIVATE_KEY)
     def __get_public_key_in_file__(self, pubfile):
-        with open(pubfile) as publicfile:
-            p = publicfile.read()
-            pubkey = rsa.PublicKey.load_pkcs1(p)
+        publicfile = open(pubfile)
+        p = publicfile.read()
+        pubkey = rsa.PublicKey.load_pkcs1(p)
+        publicfile.close()
         return pubkey
     def __get_private_key_in_file__(self, prifile):
-        with open(prifile) as privatefile:
-            p = privatefile.read()
-            prikey = rsa.PrivateKey.load_pkcs1(p)
+        privatefile = open(prifile, 'r')
+        p = privatefile.read()
+        prikey = rsa.PrivateKey.load_pkcs1(p)
+        privatefile.close()
         return prikey
