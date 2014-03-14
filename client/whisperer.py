@@ -2,6 +2,8 @@
 #--*-- coding: utf-8 --*--
 # Liszt 2014-3-12
 
+import warnings
+warnings.filterwarnings("ignore")
 import socket
 import os
 import paramiko
@@ -35,9 +37,9 @@ class whisperer(object):
         res = self.encode.decode(sock.recv(1024))
         sock.close()
         if not res.startswith("0.."):
-            print >> sys.stderr, "Permission deny."
+            print >> sys.stdout, "Permission deny."
             sys.exit(2)
-        self.psd = res.strip("0..")
+        self.psd = res[3:]
     def __get_user__(self):
         self.user = os.getenv("SUDO_USER")
     def __ssh__(self):
@@ -51,5 +53,5 @@ class whisperer(object):
             channel.close()
             ssh.close()
         except Exception, msg:
-            print >> sys.stderr, msg
+            print >> sys.stdout, msg
             sys.exit(1)
