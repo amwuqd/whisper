@@ -32,9 +32,9 @@ class listener(object):
         self.encode             = encoder.encoder(self.PRIVATE_KEY_FILE, self.REMOTE_KEY_FILE)
     def init_log(self):
         self.logger = logging.getLogger("whisper")
-        self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.INFO)
         fh = logging.FileHandler("access.log")
-        fh.setLevel(logging.DEBUG)
+        fh.setLevel(logging.INFO)
         #ch = logging.StreamHandler()
         #ch.setLevel(logging.DEBUG)
         formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -77,6 +77,8 @@ class listener(object):
             except PermissionDeny:
                 self.logger.error("%s %s PD" % (addr, buf))
                 conn.send(self.encode.encode("1..deny"))
+            except Exception, msg:
+                self.logger.error("%s %s" % (addr, msg))
             conn.close()
         listen_fd.close()
     def handler(self, message, r):
