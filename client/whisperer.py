@@ -42,13 +42,17 @@ class whisperer(object):
         self.psd = res[3:]
     def __get_user__(self):
         self.user = os.getenv("SUDO_USER")
+    def __get_window_size(self):
+        rows, columns = os.popen('stty size', 'r').read().split()
+        return rows, columns
     def __ssh__(self):
         try:
             ssh = paramiko.SSHClient()
             ssh.load_system_host_keys()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(self.hostname, port=22, username=self.username, password=self.psd, compress=True)
-            channel = ssh.invoke_shell()
+            rows, columns = self.__get_window_size()
+            channel = ssh.invoke_shell(width=columns, height=rows)
             interactive.interactive_shell(channel)
             channel.close()
             ssh.close()
