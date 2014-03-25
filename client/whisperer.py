@@ -43,7 +43,7 @@ class whisperer(object):
     def __get_user__(self):
         self.user = os.getenv("SUDO_USER")
     def __get_window_size(self):
-        rows, columns = os.popen('stty size', 'r').read().split()
+        rows, columns = map(int, os.popen('stty size', 'r').read().split())
         return rows, columns
     def __ssh__(self):
         try:
