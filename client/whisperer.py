@@ -52,7 +52,7 @@ class whisperer(object):
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(self.hostname, port=22, username=self.username, password=self.psd, compress=True)
             rows, columns = self.__get_window_size()
-            channel = ssh.invoke_shell(width=columns, height=rows)
+            channel = ssh.invoke_shell(term='xterm', width=columns, height=rows)
             interactive.interactive_shell(channel)
             channel.close()
             ssh.close()
