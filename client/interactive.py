@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 #--*-- coding: utf-8 --*--
-# Liszt 2014-2-27
+# Liszt 2014-4-3
+
+# Thanks for paramiko demo! I correct array keys catch.
 
 import socket
 import sys
+from paramiko.py3compat import u
 
 # windows does not have termios...
 try:
@@ -34,9 +37,9 @@ def posix_shell(chan):
             r, w, e = select.select([chan, sys.stdin], [], [])
             if chan in r:
                 try:
-                    x = chan.recv(1024)
+                    x = u(chan.recv(1024))
                     if len(x) == 0:
-                        #print '\r\n*** EOF\r\n',
+                        #sys.stdout.write('\r\n*** EOF\r\n')
                         break
                     sys.stdout.write(x)
                     sys.stdout.flush()
@@ -46,6 +49,10 @@ def posix_shell(chan):
                 x = sys.stdin.read(1)
                 if len(x) == 0:
                     break
+                    if x == '\x1b':
+                        x += sys.stdin.read(1)
+                        if x == '\x1b\x5b':
+                            x += sys.stdin.read(1)
                 chan.send(x)
 
     finally:
