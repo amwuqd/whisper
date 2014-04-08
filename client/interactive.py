@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 #--*-- coding: utf-8 --*--
-# Liszt 2014-4-3
-
-# Thanks for paramiko demo! I correct array keys catch.
+# Liszt 2014-4-4
 
 import socket
 import sys
 from paramiko.py3compat import u
 
 # windows does not have termios...
+
+
+class CaseEOF(Exception):
+    pass
+
 try:
     import termios
     import tty
@@ -26,37 +29,53 @@ def interactive_shell(chan):
 
 def posix_shell(chan):
     import select
+    import fcntl
+    import os
     
+    fd = sys.stdin.fileno()
+    chan_fd = chan.fileno()
     oldtty = termios.tcgetattr(sys.stdin)
+    oldflags = fcntl.fcntl(fd, fcntl.F_GETFL)
+    chan_oldflags = fcntl.fcntl(chan_fd, fcntl.F_GETFL)
+    fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
+    fcntl.fcntl(chan_fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
     try:
-        tty.setraw(sys.stdin.fileno())
-        tty.setcbreak(sys.stdin.fileno())
+        tty.setraw(fd)
+        tty.setcbreak(fd)
         chan.settimeout(0.0)
 
         while True:
             r, w, e = select.select([chan, sys.stdin], [], [])
             if chan in r:
                 try:
-                    x = u(chan.recv(1024))
-                    if len(x) == 0:
+                    while True:
+                        x = chan.recv(1024)
+                        if len(x) == 0:
                         #sys.stdout.write('\r\n*** EOF\r\n')
-                        break
-                    sys.stdout.write(x)
-                    sys.stdout.flush()
+                            raise CaseEOF
+                        sys.stdout.write(x)
+                        sys.stdout.flush()
                 except socket.timeout:
                     pass
+                except IOError:
+                    continue
+                except CaseEOF:
+                    break
             if sys.stdin in r:
                 x = sys.stdin.read(1)
                 if len(x) == 0:
                     break
-                    if x == '\x1b':
+                try:
+                    while True:
                         x += sys.stdin.read(1)
-                        if x == '\x1b\x5b':
-                            x += sys.stdin.read(1)
+                except IOError:
+                    pass
                 chan.send(x)
 
     finally:
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)
+        fcntl.fcntl(fd, fcntl.F_SETFL, oldflags)
+        fcntl.fcntl(chan_fd, fcntl.F_SETFL, chan_oldflags)
 
     
 # thanks to Mike Looijmans for this code
