@@ -1,10 +1,14 @@
-#!/usr/bin/env python
+#!/usr/bin/python27/bin/python
 #--*-- coding: utf-8 --*--
 # Liszt 2014-3-4
 
 import rsa
 import os
 import stat
+from Crypto.Cipher import AES
+from Crypto import Random
+import base64
+
 
 def create_rsa_file(pubfile, prifile):
     pubkey, prikey = rsa.newkeys(1024)
@@ -33,14 +37,40 @@ class encoder(object):
     def decode(self, MESSAGE):
         return rsa.decrypt(MESSAGE, self.PRIVATE_KEY)
     def __get_public_key_in_file__(self, pubfile):
-        publicfile = open(pubfile)
-        p = publicfile.read()
-        pubkey = rsa.PublicKey.load_pkcs1(p)
-        publicfile.close()
+        with open(pubfile) as publicfile:
+            p = publicfile.read()
+            pubkey = rsa.PublicKey.load_pkcs1(p)
         return pubkey
     def __get_private_key_in_file__(self, prifile):
-        privatefile = open(prifile, 'r')
-        p = privatefile.read()
-        prikey = rsa.PrivateKey.load_pkcs1(p)
-        privatefile.close()
+        with open(prifile) as privatefile:
+            p = privatefile.read()
+            prikey = rsa.PrivateKey.load_pkcs1(p)
         return prikey
+
+class AES_encoder(object):
+    def __init__(self, key=None):
+        self.bs = 32
+        if key is None:
+            key = Random.new().read(self.bs)
+        if len(key) >= 32:
+            self.key = key[:32]
+        else:
+            self.key = self._pad(key)
+
+    def encode(self, raw):
+        raw = self._pad(raw)
+        iv = Random.new().read(AES.block_size)
+        cipher = AES.new(self.key, AES.MODE_CBC, iv)
+        return base64.b64encode(iv + cipher.encrypt(raw))
+
+    def decode(self, enc):
+        enc = base64.b64decode(enc)
+        iv = enc[:AES.block_size]
+        cipher = AES.new(self.key, AES.MODE_CBC, iv)
+        return self._unpad(cipher.decrypt(enc[AES.block_size:]))
+
+    def _pad(self, s):
+        return s + (self.bs - len(s) % self.bs) * chr(self.bs - len(s) % self.bs)
+
+    def _unpad(self, s):
+        return s[:-ord(s[len(s)-1:])]
