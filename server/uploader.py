@@ -139,7 +139,7 @@ class uploader(object):
             # permission check
             try:
                 if grant_user not in self.root:
-                    if grant_user not in self.ser_dev["%s@%s" (remote_user, hostname)]:
+                    if grant_user not in self.ser_dev["%s@%s" % (remote_user, hostname)]:
                         raise KeyError, "grant_user no permission"
             except KeyError:
                 res += "%s[Failed]%s  %s grant_user has no permission\n" % (bcolors.FAIL, bcolors.ENDC, key)
