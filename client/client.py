@@ -5,6 +5,11 @@
 # Liszt 2014-6-10
 # 将默认登陆用户修改为twin14：xl_dev，其他：root1
 
+# Liszt 2014-8-20
+# 增加捕获Ctrl+C异常
+
+import signal
+signal.signal(signal.SIGINT, lambda x,y: sys.exit(0))
 import sys
 import whisperer
 import time
