@@ -5,6 +5,11 @@
 # Liszt 2014-6-10
 # 修改默认授权用户为xl_dev
 
+# Liszt 2014-8-20
+# 增加捕获Ctrl+C异常
+
+import signal
+signal.signal(signal.SIGINT, lambda x,y: sys.exit(0))
 import warnings
 warnings.filterwarnings("ignore")
 import socket
