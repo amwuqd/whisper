@@ -8,9 +8,9 @@
 # Liszt 2014-8-20
 # 增加捕获Ctrl+C异常
 
+import sys
 import signal
 signal.signal(signal.SIGINT, lambda x,y: sys.exit(0))
-import sys
 import whisperer
 import time
 

@@ -8,6 +8,7 @@
 # Liszt 2014-8-20
 # 增加捕获Ctrl+C异常
 
+import sys
 import signal
 signal.signal(signal.SIGINT, lambda x,y: sys.exit(0))
 import warnings
@@ -15,7 +16,6 @@ warnings.filterwarnings("ignore")
 import socket
 import ConfigParser
 import encoder
-import sys
 import os
 import time
 
